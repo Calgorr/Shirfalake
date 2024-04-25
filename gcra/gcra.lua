@@ -15,3 +15,11 @@ else
   tat = tonumber(tat)
 end
 tat = math.max(tat, now)
+
+local new_tat = tat + emission_interval
+local allow_at = new_tat - burst_offset
+local diff = now - allow_at
+
+local limited
+local retry_in
+local reset_in
