@@ -3,3 +3,6 @@ local now            = ARGV[1]
 local burst          = ARGV[2]
 local rate           = ARGV[3]
 local period         = ARGV[4]
+
+local emission_interval = period / rate
+local burst_offset      = emission_interval * burst
