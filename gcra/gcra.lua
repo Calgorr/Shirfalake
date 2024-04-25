@@ -1,0 +1,5 @@
+local rate_limit_key = KEYS[1]
+local now            = ARGV[1]
+local burst          = ARGV[2]
+local rate           = ARGV[3]
+local period         = ARGV[4]
