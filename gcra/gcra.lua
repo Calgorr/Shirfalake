@@ -23,3 +23,5 @@ local diff = now - allow_at
 local limited
 local retry_in
 local reset_in
+
+local remaining = math.floor(diff / emission_interval) -- poor man's round
