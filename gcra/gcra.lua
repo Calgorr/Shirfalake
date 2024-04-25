@@ -24,4 +24,25 @@ local limited
 local retry_in
 local reset_in
 
-local remaining = math.floor(diff / emission_interval) -- poor man's round
+local remaining = math.floor(diff / emission_interval) -- calculate how many tokens there actually are
+
+if remaining < 0 then
+    limited = 1
+    remaining = math.floor((now - (tat - burst_offset)) / emission_interval)
+    reset_in = math.ceil(tat - now)
+    retry_in = math.ceil(diff * -1)
+  elseif remaining == 0 and increment <= 0 then
+    limited = 1
+    remaining = 0
+    reset_in = math.ceil(tat - now)
+    retry_in = 0
+  else
+    limited = 0
+    reset_in = math.ceil(new_tat - now)
+    retry_in = 0
+    if increment > 0 then
+      redis.call("SET", rate_limit_key, new_tat, "PX", reset_in)
+    end
+  end
+  
+  return {limited, remaining, retry_in, reset_in, tostring(diff), tostring(emission_interval)}
