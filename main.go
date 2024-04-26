@@ -12,11 +12,10 @@ func main() {
 	rdb := redis.NewClient(&redis.Options{
 		Addr: "localhost:6379",
 	})
-
-	burst := 5
-	rps := 10
+	// burst := 5 // burst 5 for gcra
+	emission_interval := 1000
 	testDuration := time.Second * 15
-	rl := shirfalake.NewGCRA(rdb, "test", time.Second, rps, burst)
+	rl := shirfalake.NewLeakyBucket(rdb, "test", time.Second, emission_interval) // for leaky bucket you can change to gcra
 	rateLimiter := shirfalake.NewRateLimiter(rl)
 
 	acceptedCount := 0
@@ -29,15 +28,13 @@ func main() {
 		<-t.C
 
 		callStart := time.Now()
-		can, remaining := rateLimiter.Rl.Allow("gcra-test")
+		can, _ := rateLimiter.Rl.Allow("leaky-test1")
 
 		reqTime += time.Since(callStart)
 		reqCount++
 		if can {
 			acceptedCount++
 			fmt.Println("#", acceptedCount, ": accepted > ", time.Since(start))
-		} else {
-			fmt.Println("#", acceptedCount, ": rejected > ", time.Since(start), " remaining: ", remaining)
 		}
 
 		elapsedTime := time.Since(start)
@@ -46,10 +43,10 @@ func main() {
 			break
 		}
 
-		if elapsedTime > time.Second*7 && elapsedTime < time.Second*8 {
-			// three seconds of rest, it should open up capacity for 3 more requests
-			<-time.After(time.Second * 3)
-		}
+		// if elapsedTime > time.Second*7 && elapsedTime < time.Second*8 { // also for gcra uncomment this block if you want to test gcra
+		// 	// three seconds of rest, it should open up capacity for 3 more requests
+		// 	<-time.After(time.Second * 3)
+		// }
 	}
 
 	fmt.Println("Redis average response time ", time.Duration(reqTime.Nanoseconds()/int64(reqCount)))
