@@ -1,7 +1,6 @@
 package shirfalake
 
 import (
-	_ "embed"
 	"time"
 
 	"github.com/go-redis/redis"
