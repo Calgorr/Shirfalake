@@ -16,3 +16,18 @@ if type(last) == 'table' and #last > 0 then
     break
   end
 end
+
+if ts > tat then
+    next = ts  
+end
+
+redis.call('ZADD', key, tat, tat)
+
+
+local limited=0
+
+if tat > ts then
+  limited = 1
+end
+
+return {limited, tostring(tat-ts)}  -- return the remaining time
