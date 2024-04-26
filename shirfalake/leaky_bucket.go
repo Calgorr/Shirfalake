@@ -7,20 +7,22 @@ import (
 )
 
 type LeakyBucket struct {
-	rdb     *redis.Client
-	prefix  string
-	gcra    *redis.Script
-	timeout time.Duration
+	rdb         *redis.Client
+	prefix      string
+	leakyBucket *redis.Script
+	timeout     time.Duration
+	rps         int
 }
 
-func NewLeakyBucket(rdb *redis.Client, prefix string, timeout time.Duration) *LeakyBucket {
-	gcra := &LeakyBucket{
+func NewLeakyBucket(rdb *redis.Client, prefix string, timeout time.Duration, rps int) *LeakyBucket {
+	leakyBucket := &LeakyBucket{
 		rdb:     rdb,
 		prefix:  prefix,
 		timeout: timeout,
+		rps:     rps,
 	}
 
-	gcra.gcra = redis.NewScript(`local time_stamp  = tonumber(ARGV[1])
+	leakyBucket.leakyBucket = redis.NewScript(`local time_stamp  = tonumber(ARGV[1])
 	local rps = tonumber(ARGV[2])
 	local key = KEYS[1]
 	
@@ -54,12 +56,12 @@ func NewLeakyBucket(rdb *redis.Client, prefix string, timeout time.Duration) *Le
 	
 	return {limited, tostring(tat-ts)}  -- return the remaining time`)
 
-	return gcra
+	return leakyBucket
 }
 
-func (gcra *LeakyBucket) Allow(key string, rps int) (bool, int) {
+func (leakyBucket *LeakyBucket) Allow(key string) (bool, int) {
 	ts := time.Now().UnixNano()
-	res, err := gcra.gcra.Run(gcra.rdb, []string{gcra.prefix + key}, ts, rps).Result()
+	res, err := leakyBucket.leakyBucket.Run(leakyBucket.rdb, []string{leakyBucket.prefix + key}, ts, leakyBucket.rps).Result()
 	if err != nil {
 		return false, 0
 	}

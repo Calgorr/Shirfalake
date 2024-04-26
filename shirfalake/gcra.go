@@ -8,17 +8,20 @@ import (
 )
 
 type GCRA struct {
-	rdb     *redis.Client
-	prefix  string
-	gcra    *redis.Script
-	timeout time.Duration
+	rdb        *redis.Client
+	prefix     string
+	gcra       *redis.Script
+	timeout    time.Duration
+	rps, burst int
 }
 
-func NewGCRA(rdb *redis.Client, prefix string, timeout time.Duration) *GCRA {
+func NewGCRA(rdb *redis.Client, prefix string, timeout time.Duration, rps, burst int) *GCRA {
 	gcra := &GCRA{
 		rdb:     rdb,
 		prefix:  prefix,
 		timeout: timeout,
+		rps:     rps,
+		burst:   burst,
 	}
 
 	gcra.gcra = redis.NewScript(`
@@ -75,9 +78,9 @@ func NewGCRA(rdb *redis.Client, prefix string, timeout time.Duration) *GCRA {
 	return gcra
 }
 
-func (g *GCRA) Allow(key string, rps, burst int) (bool, int) {
+func (g *GCRA) Allow(key string) (bool, int) {
 	now := time.Now().UnixNano() / int64(time.Millisecond)
-	result, err := g.gcra.Run(g.rdb, []string{g.prefix + key}, now, burst, rps, g.timeout.Milliseconds()).Result()
+	result, err := g.gcra.Run(g.rdb, []string{g.prefix + key}, now, g.burst, g.rps, g.timeout.Milliseconds()).Result()
 	if err != nil {
 		return false, 0
 	}
