@@ -6,12 +6,12 @@ type RateLimit interface {
 }
 
 type RateLimiter struct {
-	rl *RateLimit
+	Rl RateLimit
 }
 
 // NewRateLimiter creates a new RateLimiter instance
-func NewRateLimiter(rl RateLimit, rps, burst int) *RateLimiter {
+func NewRateLimiter(Rl RateLimit) *RateLimiter {
 	return &RateLimiter{
-		rl: &rl,
+		Rl: Rl,
 	}
 }
