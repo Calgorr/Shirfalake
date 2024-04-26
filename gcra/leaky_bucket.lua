@@ -7,11 +7,11 @@ redis.call('ZREMRANGEBYSCORE', key, '-inf', min)
 
 local last = redis.call('ZRANGE', key, -1, -1)
 
-local next = time_stamp
+local tat = time_stamp
 
 if type(last) == 'table' and #last > 0 then
   for key,value in pairs(last) do
-    next = tonumber(value) + 1/rps
+    tat = tonumber(value) + 1/rps
 
     break
   end
