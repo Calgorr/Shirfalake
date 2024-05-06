@@ -3,8 +3,7 @@
 </div>
 
 # Rate Limiting Algorithms with Lua and Redis
-
-This repository contains Lua implementations of three popular rate limiting algorithms: Generic Cell Rate Algorithm (GCRA), Leaky Bucket, and Sliding Window, using Redis as the data store for rate limiting.
+implementation of three popular rate limiting algorithms: Generic Cell Rate Algorithm (GCRA), Leaky Bucket, and Sliding Window, using Redis as the data store for rate limiting.
 
 ## Algorithms
 
